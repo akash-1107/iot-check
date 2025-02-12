@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Data Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #444;
+        }
+        .table-container {
+            max-width: 90%;
+            margin: 20px auto;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 auto;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>IoT Data Dashboard</h1>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>IMEI</th>
+                    <th>Header</th>
+                    <th>Vendor ID</th>
+                    <th>Firmware Version</th>
+                    <th>Packet Type</th>
+                    <th>Alert ID</th>
+                    <th>Packet Status</th>
+                    <th>Vehicle Registration</th>
+                </tr>
+            </thead>
+            <tbody id="data-table">
+                <!-- Live data will appear here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const socket = new WebSocket('ws://localhost:8080'); // Connect to WebSocket server
+        const dataTable = document.getElementById('data-table');
+        const deviceData = {}; // Store data keyed by IMEI
+
+        socket.onopen = () => {
+            console.log('WebSocket connection established');
+        };
+
+        socket.onmessage = (event) => {
+            console.log('Data received:', event.data);
+
+            try {
+                const parsedData = JSON.parse(event.data);
+                const imei = Object.keys(parsedData)[0]; // Extract the IMEI key
+                const data = parsedData[imei];
+
+                // Check if a row for this IMEI already exists
+                if (deviceData[imei]) {
+                    // Update the existing row
+                    const existingRow = document.getElementById(`row-${imei}`);
+                    existingRow.innerHTML = `
+                        <td>${data.imei}</td>
+                        <td>${data.header}</td>
+                        <td>${data.vendorId}</td>
+                        <td>${data.firmwareVersion}</td>
+                        <td>${data.packetType}</td>
+                        <td>${data.alertId}</td>
+                        <td>${data.packetStatus}</td>
+                        <td>${data.vehicleRegistration}</td>
+                    `;
+                } else {
+                    // Add a new row for this IMEI
+                    const row = document.createElement('tr');
+                    row.id = `row-${imei}`;
+                    row.innerHTML = `
+                        <td>${data.imei}</td>
+                        <td>${data.header}</td>
+                        <td>${data.vendorId}</td>
+                        <td>${data.firmwareVersion}</td>
+                        <td>${data.packetType}</td>
+                        <td>${data.alertId}</td>
+                        <td>${data.packetStatus}</td>
+                        <td>${data.vehicleRegistration}</td>
+                    `;
+                    dataTable.appendChild(row);
+
+                    // Add to deviceData map
+                    deviceData[imei] = data;
+                }
+            } catch (error) {
+                console.error('Error parsing data:', error.message);
+            }
+        };
+
+        socket.onclose = () => {
+            console.log('WebSocket connection closed');
+        };
+
+        socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+    </script>
+</body>
+</html>
