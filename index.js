@@ -22,7 +22,7 @@ const tcpServer = net.createServer((socket) => {
     // Store the string in MongoDB (Keep only last 400)
     await IoTData.findOneAndUpdate(
         {},
-        { $push: { data: { $each: [rawData], $slice: -400 } } },
+        { $push: { data: { $each: [rawData], $slice: -500 } } },
         { upsert: true, new: true }
     );
 
