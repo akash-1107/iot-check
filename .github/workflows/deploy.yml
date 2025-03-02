@@ -1,0 +1,26 @@
+name: Deploy to DigitalOcean
+
+on:
+  push:
+    branches:
+      - master  # Change this to your deployment branch if different
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: 139.59.5.221  # Replace with your DigitalOcean Droplet IP
+          username: root
+          key: ${{secrets.DIGITALOCEAN_SSH_KEY }}
+          script: |
+            cd /root/iot-check  # Replace with your actual project path
+            git pull origin master
+            npm install
+            pm2 restart all
