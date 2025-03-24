@@ -20,13 +20,14 @@ const tcpServer = net.createServer((socket) => {
     const rawData = data.toString().trim();
     console.log("Raw data received:", rawData);
     // Store the string in MongoDB (Keep only last 400)
+    if(rawData.startsWith("$") && rawData.endsWith("*")) {
     await IoTData.findOneAndUpdate(
         {},
-        { $push: { data: { $each: [rawData], $slice: -500 } } },
+        { $push: { data: { $each: [rawData], $slice: -525 } } },
         { upsert: true, new: true }
     );
 
-    console.log("Data stored successfully.");
+    console.log("Data stored successfully."); }
 
     try {
       wss.clients.forEach(async(client) => {
