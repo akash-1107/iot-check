@@ -157,7 +157,7 @@ const tcpServer = net.createServer((socket) => {
           checksum: parts[45],
         };
 
-        console.log(`Parsed BMS data for IMEI ${parsedData.imei}:`, parsedData);
+        // console.log(`Parsed BMS data for IMEI ${parsedData.imei}:`, parsedData);
 
         // **🚀 Send only to subscribed WebSocket clients for this IMEI**
         if (clients.has(parsedData.imei)) {
